@@ -1,0 +1,1 @@
+Include your target image in this directory in .png extension.
