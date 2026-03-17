@@ -13,8 +13,7 @@ class CGI_Engine():
         x0, y0 = p0
         x1, y1 = p1
         r0, g0, b0 = color0
-        if color1 is not None:
-            r1, g1, b1 = color1
+        r1, g1, b1 = color1 if color1 is not None else color0
 
         # reverse x and y for steep lines
         reversed = abs(y1 - y0) > abs(x1 - x0)
@@ -41,13 +40,10 @@ class CGI_Engine():
         for i, x in enumerate(range(x0, x1 + 1)):
 
             # color interpolation
-            if color1 is not None:
-                u = i / steps
-                r = r0 + u * (r1 - r0)
-                g = g0 + u * (g1 - g0)
-                b = b0 + u * (b1 - b0)
-            else:
-                r, g, b = r0, g0, b0
+            u = i / steps
+            r = r0 + u * (r1 - r0)
+            g = g0 + u * (g1 - g0)
+            b = b0 + u * (b1 - b0)
 
             # plot pixel
             if reversed:
@@ -61,37 +57,33 @@ class CGI_Engine():
                 y += y_step
                 err += dx
 
-    def rasterize_interpolated_lines(self, window: RIT_Window, vertices: list[int], colors: list[float], n: int):
-        #unpack vertices and colors, then rasterize them as lines
-        for i in range(n):
-            p0 = (vertices[4 * i], vertices[4 * i + 1])
-            p1 = (vertices[4 * i + 2], vertices[4 * i + 3])
-            color0 = (colors[6 * i], colors[6 * i + 1], colors[6 * i + 2])
-            color1 = (colors[6 * i + 3], colors[6 * i + 4], colors[6 * i + 5])
-            self.rasterize_line(window, p0, p1, color0, color1)
-
     def draw_lines(self, window: RIT_Window, vertices: list[int], colors: list[float], indices: list[int], modelT, normT):
-        #unpack vertices and colors, then rasterize them as lines
+        # Unpack vertices and colors
         mapped_vertices = []
         for i in indices:
             vec = glm.vec3(vertices[2 * i], vertices[2 * i + 1], 1)
-            vec = self.VIEWPORT_T * normT * modelT * vec
-            V = Vertex(vec[0], vec[1], colors[3 * i], colors[3 * i + 1], colors[3 * i + 2])
+            vec = normT * modelT * vec
+            V = Vertex(int(vec[0]), int(vec[1]), colors[3 * i], colors[3 * i + 1], colors[3 * i + 2])
             mapped_vertices.append(V)
-        unpacked_vertices = []
-        unpacked_colors = []
-        for V in mapped_vertices:
-            unpacked_vertices.extend([int(V.x), int(V.y)])
-            unpacked_colors.extend([V.r, V.g, V.b])
-        self.rasterize_interpolated_lines(window, unpacked_vertices, unpacked_colors, len(mapped_vertices)//2)
+        
+        # Separate into line segments
+        for i in range(0, len(mapped_vertices), 2):
+            line = self.clip_line(mapped_vertices[i], mapped_vertices[i + 1], 1, -1, 1, -1)
+            if line is None:
+                continue
+            vec0 = self.VIEWPORT_T * glm.vec3(line[0].x, line[0].y, 1)
+            vec1 = self.VIEWPORT_T * glm.vec3(line[1].x, line[1].y, 1)
+            V0 = Vertex(int(vec0[0]), int(vec0[1]), line[0].r, line[0].g, line[0].b)
+            V1 = Vertex(int(vec1[0]), int(vec1[1]), line[1].r, line[1].g, line[1].b)
+
+            self.rasterize_line(window, (V0.x, V0.y), (V1.x, V1.y), (V0.r, V0.g, V0.b), (V1.r, V1.g, V1.b))
 
     def draw_triangles(self, window: RIT_Window, vertices: list[int], colors: list[float], indices: list[int], modelT, normT):
         # unpack vertices and colors, then rasterize them as triangles
         for idx, i in enumerate(indices):
-            V = Vertex(vertices[2 * i], vertices[2 * i + 1], colors[3 * i], colors[3 * i + 1], colors[3 * i + 2])
-            vec = glm.vec3(V.x, V.y, 1)
-            vec = self.VIEWPORT_T * normT * modelT * vec
-            V = Vertex(vec[0], vec[1], V.r, V.g, V.b)
+            vec = glm.vec3(vertices[2 * i], vertices[2 * i + 1], 1)
+            vec = normT * modelT * vec
+            V = Vertex(vec[0], vec[1], colors[3 * i], colors[3 * i + 1], colors[3 * i + 2])
             
             if idx % 3 == 0:
                 V0 = V
@@ -99,7 +91,14 @@ class CGI_Engine():
                 V1 = V
             else:
                 V2 = V
-                self.rasterize_triangle(window, V0, V1, V2)
+
+                # Clip triangle and rasterize
+                vertices = self.clip_poly([V0, V1, V2], 1, -1, 1, -1)
+                for i, V in enumerate(vertices):
+                    vec = self.VIEWPORT_T * glm.vec3(V.x, V.y, 1)
+                    vertices[i] = Vertex(int(vec[0]), int(vec[1]), V.r, V.g, V.b)
+                for i in range(0, len(vertices), 3):
+                    self.rasterize_triangle(window, vertices[i], vertices[i + 1], vertices[i + 2])
 
     def rasterize_triangle(self, window: RIT_Window, V0: Vertex, V1: Vertex, V2: Vertex):
         # Rasterize a triangle defined by vertices V0, V1, V2 with color interpolation
@@ -147,7 +146,120 @@ class CGI_Engine():
                 g = w0 * V0.g + w1 * V1.g + w2 * V2.g
                 b = w0 * V0.b + w1 * V1.b + w2 * V2.b
                 window.set_pixel(x, y, r, g, b)
+
+    # Cohen-Sutherland line clipping algorithm
+    def clip_line(self, p0: Vertex, p1: Vertex, top: float, bottom: float, right: float, left: float):
+        code0 = self.compute_outcode(p0, top, bottom, right, left)
+        code1 = self.compute_outcode(p1, top, bottom, right, left)
+        while True:
+            # Trivial accept or reject cases
+            if (code0 | code1) == 0:
+                return p0, p1
+            if (code0 & code1) != 0:
+                return None
+            
+            # Find an endpoint that is outside the viewport
+            if code0 != 0:
+                code_out = code0
+                p_out = p0
+            else:
+                code_out = code1
+                p_out = p1
+            
+            # Find intersection point with viewport boundary
+            if code_out & 8:
+                x = p_out.x + (p1.x - p0.x) * (top - p_out.y) / (p1.y - p0.y)
+                y = top
+            elif code_out & 4:
+                x = p_out.x + (p1.x - p0.x) * (bottom - p_out.y) / (p1.y - p0.y)
+                y = bottom
+            elif code_out & 2:
+                y = p_out.y + (p1.y - p0.y) * (right - p_out.x) / (p1.x - p0.x)
+                x = right
+            else:
+                y = p_out.y + (p1.y - p0.y) * (left - p_out.x) / (p1.x - p0.x)
+                x = left
+            
+            # Replace outside point with intersection point and update outcode
+            if code_out == code0:
+                p0 = Vertex(x, y, p_out.r, p_out.g, p_out.b)
+                code0 = self.compute_outcode(p0, top, bottom, right, left)
+            else:
+                p1 = Vertex(x, y, p_out.r, p_out.g, p_out.b)
+                code1 = self.compute_outcode(p1, top, bottom, right, left)
+
+    # Helper function to compute outcode for Cohen-Sutherland line clipping
+    def compute_outcode(self, p: Vertex, top: float, bottom: float, right: float, left: float):
+        code = 0
+        if p.y > top:
+            code |= 8
+        if p.y < bottom:
+            code |= 4
+        if p.x > right:
+            code |= 2
+        if p.x < left:
+            code |= 1
+        return code
+
+    # Sutherland-Hodgman polygon clipping algorithm
+    def clip_poly(self, vertices: list[Vertex], top: float, bottom: float, right: float, left: float):
+        edges = [(top, 'top'), (bottom, 'bottom'), (right, 'right'), (left, 'left')]
+        for edge in edges:
+            new_vertices = []
+            for i in range(len(vertices)):
+                prev = vertices[i - 1]
+                V = vertices[i]
+                new_vertices.extend(self.evaluate_edge(prev, V, edge))
+            vertices = new_vertices
+        if len(vertices) > 3:
+            vertices = self.triangulate_polygon(vertices)
+        return vertices
     
+    # Helper function to evaluate a line segment against a single edge and clip it if necessary
+    def evaluate_edge(self, prev: Vertex, V: Vertex, edge):
+        if edge[1] == 'top':
+            inside0 = prev.y <= edge[0]
+            inside1 = V.y <= edge[0]
+        elif edge[1] == 'bottom':
+            inside0 = prev.y >= edge[0]
+            inside1 = V.y >= edge[0]
+        elif edge[1] == 'right':
+            inside0 = prev.x <= edge[0]
+            inside1 = V.x <= edge[0]
+        else: # left
+            inside0 = prev.x >= edge[0]
+            inside1 = V.x >= edge[0]
+        if inside0 and inside1:
+            return [V]
+        if inside0 and not inside1:
+            return [self.find_intersection(prev, V, edge)]
+        if not inside0 and inside1:
+            return [self.find_intersection(prev, V, edge), V]
+        return []
+    
+    # Helper function to interpolate the vertex at the intersection of a line segment and a clipping edge
+    def find_intersection(self, prev: Vertex, V: Vertex, edge):
+        if edge[1] == 'top' or edge[1] == 'bottom':
+            x = prev.x + (V.x - prev.x) * (edge[0] - prev.y) / (V.y - prev.y)
+            y = edge[0]
+            r = prev.r + (V.r - prev.r) * ((y - prev.y) / (V.y - prev.y))
+            g = prev.g + (V.g - prev.g) * ((y - prev.y) / (V.y - prev.y))
+            b = prev.b + (V.b - prev.b) * ((y - prev.y) / (V.y - prev.y))
+        else:
+            y = prev.y + (V.y - prev.y) * (edge[0] - prev.x) / (V.x - prev.x)
+            x = edge[0]
+            r = prev.r + (V.r - prev.r) * ((x - prev.x) / (V.x - prev.x))
+            g = prev.g + (V.g - prev.g) * ((x - prev.x) / (V.x - prev.x))
+            b = prev.b + (V.b - prev.b) * ((x - prev.x) / (V.x - prev.x))
+        return Vertex(x, y, r, g, b)
+    
+    # Helper function for triangulation of convex polygons
+    def triangulate_polygon(self, vertices: list[Vertex]):
+        triangles = []
+        for i in range(1, len(vertices) - 1):
+            triangles.extend([vertices[0], vertices[i], vertices[i + 1]])
+        return triangles
+
     def identity(self):
         return glm.mat3(1)
 
