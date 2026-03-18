@@ -93,12 +93,12 @@ class CGI_Engine():
                 V2 = V
 
                 # Clip triangle and rasterize
-                vertices = self.clip_poly([V0, V1, V2], 1, -1, 1, -1)
-                for i, V in enumerate(vertices):
+                clipped_vertices = self.clip_poly([V0, V1, V2], 1, -1, 1, -1)
+                for i, V in enumerate(clipped_vertices):
                     vec = self.VIEWPORT_T * glm.vec3(V.x, V.y, 1)
-                    vertices[i] = Vertex(int(vec[0]), int(vec[1]), V.r, V.g, V.b)
-                for i in range(0, len(vertices), 3):
-                    self.rasterize_triangle(window, vertices[i], vertices[i + 1], vertices[i + 2])
+                    clipped_vertices[i] = Vertex(int(vec[0]), int(vec[1]), V.r, V.g, V.b)
+                for i in range(0, len(clipped_vertices), 3):
+                    self.rasterize_triangle(window, clipped_vertices[i], clipped_vertices[i + 1], clipped_vertices[i + 2])
 
     def rasterize_triangle(self, window: RIT_Window, V0: Vertex, V1: Vertex, V2: Vertex):
         # Rasterize a triangle defined by vertices V0, V1, V2 with color interpolation
