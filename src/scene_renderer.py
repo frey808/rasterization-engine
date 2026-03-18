@@ -22,21 +22,21 @@ layer1_index_data = np.arange(layer1_mountains.shape[0]//2)
 
 # layer 2 data
 layer2_mountains = np.array([
-    0, 80, 160, 170, 0, 0, #peak1
-    160, 170, 200, 155, 0, 0,
-    200, 155, 230, 163, 0, 0, #peak2
-    230, 163, 280, 167, 0, 0,
-    280, 167, 305, 165, 0, 0,
-    305, 165, 330, 153, 0, 0,
-    330, 153, 387, 170, 0, 0, #peak3
-    387, 170, 403, 158, 0, 0,
-    403, 158, 434, 158, 0, 0,
-    434, 158, 445, 167, 0, 0, #peak4
-    445, 167, 463, 167, 0, 0,
-    463, 167, 495, 198, 0, 0, #peak5
-    495, 198, 531, 198, 0, 0,
-    531, 198, 599, 224, 0, 0,
-    0, 0, 599, 224, 599, 0
+    0, 80, 160, 170, 599, 0, #peak1
+    160, 170, 200, 155, 599, 0,
+    200, 155, 230, 163, 599, 0, #peak2
+    230, 163, 280, 167, 599, 0,
+    280, 167, 305, 165, 599, 0,
+    305, 165, 330, 153, 599, 0,
+    330, 153, 387, 170, 599, 0, #peak3
+    387, 170, 403, 158, 599, 0,
+    403, 158, 434, 158, 599, 0,
+    434, 158, 445, 167, 599, 0, #peak4
+    445, 167, 463, 167, 599, 0,
+    463, 167, 495, 198, 599, 0, #peak5
+    495, 198, 531, 198, 599, 0,
+    531, 198, 599, 224, 599, 0,
+    # 0, 0, 599, 224, 599, 0
 ])
 layer2_color_data = np.array([116/255, 167/255, 215/255] * (layer2_mountains.shape[0]//2))
 layer2_index_data = np.arange(layer2_mountains.shape[0]//2)
@@ -71,6 +71,45 @@ layer3_mountains = np.array([
 layer3_color_data = np.array([51/255, 111/255, 154/255] * (layer3_mountains.shape[0]//2))
 layer3_index_data = np.arange(layer3_mountains.shape[0]//2)
 
+# layer 4 data
+layer4_mountains = np.array([
+    0, 68, 8, 76, 0, 0,
+    8, 76, 25, 76, 0, 0,
+    25, 76, 41, 66, 0, 0,
+    41, 66, 74, 75, 0, 0,
+    74, 75, 85, 73, 0, 0,
+    85, 73, 101, 58, 0, 0,
+    101, 58, 108, 57, 0, 0,
+    0, 0, 108, 57, 300, 0, #stitching point
+    108, 57, 126, 75, 300, 0,
+    126, 75, 169, 103, 300, 0,
+    169, 103, 187, 106, 300, 0,
+    187, 106, 246, 78, 300, 0,
+    246, 78, 255, 70, 300, 0,
+    255, 70, 314, 77, 300, 0,
+    314, 77, 330, 85, 300, 0,
+    330, 85, 347, 101, 300, 0,
+    347, 101, 365, 104, 300, 0,
+    365, 104, 375, 100, 300, 0,
+    375, 100, 388, 88, 300, 0,
+    388, 88, 400, 87, 300, 0,
+    400, 87, 412, 90, 300, 0,
+    412, 90, 433, 75, 300, 0,
+    433, 75, 446, 80, 300, 0,
+    446, 80, 477, 84, 300, 0,
+    300, 0, 477, 84, 599, 0, #stitching point
+    477, 84, 485, 91, 599, 0,
+    485, 91, 499, 94, 599, 0,
+    499, 94, 503, 106, 599, 0,
+    503, 106, 532, 111, 599, 0,
+    532, 111, 543, 123, 599, 0,
+    543, 123, 557, 127, 599, 0,
+    557, 127, 573, 124, 599, 0,
+    573, 124, 599, 126, 599, 0,
+])
+layer4_color_data = np.array([29/255, 69/255, 104/255] * (layer4_mountains.shape[0]//2))
+layer4_index_data = np.arange(layer4_mountains.shape[0]//2)
+
 
 def landscape(window: RIT_Window, engine: CGI_Engine):
     # Setup
@@ -84,7 +123,8 @@ def landscape(window: RIT_Window, engine: CGI_Engine):
     engine.draw_triangles(window, layer1_mountains, layer1_color_data, layer1_index_data, base, normT)
     engine.draw_triangles(window, layer2_mountains, layer2_color_data, layer2_index_data, base, normT)
     engine.draw_triangles(window, layer3_mountains, layer3_color_data, layer3_index_data, base, normT)
-    
+    engine.draw_triangles(window, layer4_mountains, layer4_color_data, layer4_index_data, base, normT)
+
 
 def main():
     engine = CGI_Engine()
