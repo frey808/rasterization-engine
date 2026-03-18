@@ -111,11 +111,11 @@ class CGI_Engine():
 
         # precompute denominator for barycentric coordinates and normalize vertex order to counter-clockwise
         denom = (V1.y - V2.y) * (V0.x - V2.x) + (V2.x - V1.x) * (V0.y - V2.y)
-        if abs(denom) < EPSILON:
-            return
         if denom < 0:
             V1, V2 = V2, V1
             denom = -denom
+        if abs(denom) <= EPSILON:
+            return
         inv_denom = 1 / denom #avoid potential division by zero
 
 

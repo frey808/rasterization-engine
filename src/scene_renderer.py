@@ -140,13 +140,30 @@ layer4_mountains = np.array([
 layer4_color_data = np.array([29/255, 69/255, 104/255] * (layer4_mountains.shape[0]//2))
 layer4_index_data = np.arange(layer4_mountains.shape[0]//2)
 
+# tree data
+tree_vertices = np.array([
+    16, 70, #tip
+    14, 0, 18, 0, #trunk base
+    16, 6, 16, 11, 16, 16, 16, 21, 16, 26, 16, 31, 16, 36, 16, 41, 16, 46, 16, 51, 16, 56, 16, 61, 16, 66, #foliage bases (idx 3-15)
+    6, 9, 0, 16, 1, 21, 3, 26, 4, 31, 6, 36, 8, 41, 10, 47, 11, 54, 12, 58, 13, 64, #left side foliage tips (idx 16-26)
+    26, 9, 32, 16, 31, 21, 29, 26, 28, 31, 26, 36, 24, 41, 22, 47, 21, 54, 20, 58, 19, 64, #right side foliage tips (idx 27-37)
+])
+tree_color_data = np.array([17/255, 33/255, 44/255] * (tree_vertices.shape[0]//2))
+tree_index_data = np.array([
+    0, 1, 2, #trunk
+    3, 5, 16, 4, 6, 17, 5, 7, 18, 6, 8, 19, 7, 9, 20, 8, 10, 21, 9, 11, 22, 10, 12, 23, 11, 13, 24, 13, 14, 25, 14, 15, 26, #left side foliage
+    3, 5, 27, 4, 6, 28, 5, 7, 29, 6, 8, 30, 7, 9, 31, 8, 10, 32, 9, 11, 33, 10, 12, 34, 11, 13, 35, 13, 14, 36, 14, 15, 37, #right side foliage
+])
+tree_heights = np.array([1, 1, 0.9, 0.8, 0.7, 0.5, 0.8, 0.75, 0.55, 0.6, 0.65, 0.5, 0.4, 0.55, 0.7, 0.5, 0.8, 0.4, 0.6, 0.0, 1, 0.65, 0.0, 0.75, 0.4, 0.45, 0.0, 0.45, 0.35, 0.55, 0.3, 0.4, 0.0, 0.7, 0.3, 0.75, 0.0, 0.5, 0.6, 0.0, 0.65, 0.7, 0.75, 0.4, 0.35, 0.0, 0.3, 0.9, 0.0, 0.75, 0.0, 0.45, 0.5, 0.55, 0.65, 0.0, 0.4, 0.0, 0.5, 0.6, 0.45, 0.0, 0.8, 0.4, 0.6])
+
 
 def landscape(window: RIT_Window, engine: CGI_Engine):
     # Setup
-    window.clear_fb(207/255, 229/255, 238/255) # light blue background
+    window.clear_fb(207/255, 229/255, 238/255) #light blue background
     engine.set_viewport(WINDOW_Y, 0, WINDOW_X, 0)
     normT = engine.normalize(WINDOW_Y, 0, WINDOW_X, 0)
     base = engine.identity()
+    centerTreeT = engine.translate(-16, 0) #center tree at origin for easier transformations
 
     # Draw the scene
     engine.draw_triangles(window, moon_vertices, moon_color_data, moon_index_data, base, normT)
@@ -154,6 +171,13 @@ def landscape(window: RIT_Window, engine: CGI_Engine):
     engine.draw_triangles(window, layer2_mountains, layer2_color_data, layer2_index_data, base, normT)
     engine.draw_triangles(window, layer3_mountains, layer3_color_data, layer3_index_data, base, normT)
     engine.draw_triangles(window, layer4_mountains, layer4_color_data, layer4_index_data, base, normT)
+
+    #Draw trees with varying heights
+    for i, scale in enumerate(tree_heights):
+        if scale == 0:
+            continue # skip invisible trees
+        tree = base @ engine.translate(i * 598/len(tree_heights), 0) @ engine.scale(scale, scale) @ centerTreeT
+        engine.draw_triangles(window, tree_vertices, tree_color_data, tree_index_data, tree, normT)
 
 
 def main():
