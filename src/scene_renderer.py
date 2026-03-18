@@ -2,15 +2,15 @@ import numpy as np
 from engine.cgi_engine import CGI_Engine
 from engine.rit_window import RIT_Window
 
+
+WINDOW_Y, WINDOW_X = 300, 600
+
 # a 10 x 10 equilateral triangle
 triangle_data = np.array([0.0, 0.0, 100.0, 0.0, 50.0, 100.0])
 triangle_index_data = np.array([0, 2, 1])
 
 # color data
 layer1_color_data = np.array([144/255, 194/255, 221/255, 144/255, 194/255, 221/255, 144/255, 194/255, 221/255])
-
-
-WINDOW_Y, WINDOW_X = 300, 600
 
 
 def landscape(window: RIT_Window, engine: CGI_Engine):
