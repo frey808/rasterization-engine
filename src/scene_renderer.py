@@ -28,6 +28,27 @@ layer1_mountains = np.array([
 layer1_color_data = np.array([144/255, 194/255, 221/255] * (layer1_mountains.shape[0]//2))
 layer1_index_data = np.arange(layer1_mountains.shape[0]//2)
 
+# layer 2 data
+layer2_mountains = np.array([
+    0, 80, 160, 170, 200, 155, #peak1
+    0, 0, 0, 80, 200, 155,
+    200, 155, 230, 163, 0, 0, #peak2
+    230, 163, 280, 167, 0, 0,
+    280, 167, 305, 165, 0, 0,
+    305, 165, 330, 153, 0, 0,
+    330, 153, 387, 170, 0, 0, #peak3
+    387, 170, 403, 158, 0, 0,
+    403, 158, 434, 158, 0, 0,
+    434, 158, 445, 167, 0, 0, #peak4
+    445, 167, 463, 167, 0, 0,
+    463, 167, 495, 198, 0, 0, #peak5
+    495, 198, 531, 198, 0, 0,
+    531, 198, 599, 224, 0, 0,
+    0, 0, 599, 224, 599, 0
+])
+layer2_color_data = np.array([116/255, 167/255, 215/255] * (layer2_mountains.shape[0]//2))
+layer2_index_data = np.arange(layer2_mountains.shape[0]//2)
+
 
 def landscape(window: RIT_Window, engine: CGI_Engine):
     # Setup
@@ -40,6 +61,7 @@ def landscape(window: RIT_Window, engine: CGI_Engine):
     base = engine.identity()
 
     engine.draw_triangles(window, layer1_mountains, layer1_color_data, layer1_index_data, base, normT)
+    engine.draw_triangles(window, layer2_mountains, layer2_color_data, layer2_index_data, base, normT)
 
     # Mountain layer 1
     # layer1 = base @ engine.translate(0, 130)
