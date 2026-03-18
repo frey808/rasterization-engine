@@ -4,7 +4,7 @@ from engine.vertex import Vertex
 from pyglm import glm
 import math
 
-EPSILON = 1e-6 # extremely small value to handle numerical precision issues
+EPSILON = 0 # extremely small value to handle numerical precision issues
 
 class CGI_Engine():
     VIEWPORT_T = glm.mat3(1)
