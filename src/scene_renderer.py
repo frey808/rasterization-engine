@@ -1,9 +1,39 @@
 import numpy as np
+import math
 from engine.cgi_engine import CGI_Engine
 from engine.rit_window import RIT_Window
 
 
 WINDOW_Y, WINDOW_X = 300, 600
+
+def circle_triangle_fan(x, y, r, num_triangles=20):
+    verts = []
+
+    for i in range(num_triangles):
+        # Angles for this slice
+        theta1 = (i / num_triangles) * 2 * math.pi
+        theta2 = ((i + 1) / num_triangles) * 2 * math.pi
+
+        # Points on circle
+        x1 = x + r * math.cos(theta1)
+        y1 = y + r * math.sin(theta1)
+
+        x2 = x + r * math.cos(theta2)
+        y2 = y + r * math.sin(theta2)
+
+        # Triangle: center → edge1 → edge2
+        verts.extend([
+            x,  y,   # center
+            x1, y1,  # first edge point
+            x2, y2   # second edge point
+        ])
+
+    return verts
+
+# moon data
+moon_vertices = np.array(circle_triangle_fan(336, 250, 36, num_triangles=30))
+moon_color_data = np.array([1, 1, 1] * (moon_vertices.shape[0]//2))
+moon_index_data = np.arange(moon_vertices.shape[0]//2)
 
 # layer 1 data
 layer1_mountains = np.array([
@@ -115,11 +145,11 @@ def landscape(window: RIT_Window, engine: CGI_Engine):
     # Setup
     window.clear_fb(207/255, 229/255, 238/255) # light blue background
     engine.set_viewport(WINDOW_Y, 0, WINDOW_X, 0)
-
-    # Helper matrices
     normT = engine.normalize(WINDOW_Y, 0, WINDOW_X, 0)
     base = engine.identity()
 
+    # Draw the scene
+    engine.draw_triangles(window, moon_vertices, moon_color_data, moon_index_data, base, normT)
     engine.draw_triangles(window, layer1_mountains, layer1_color_data, layer1_index_data, base, normT)
     engine.draw_triangles(window, layer2_mountains, layer2_color_data, layer2_index_data, base, normT)
     engine.draw_triangles(window, layer3_mountains, layer3_color_data, layer3_index_data, base, normT)
