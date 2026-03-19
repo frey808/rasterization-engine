@@ -44,7 +44,7 @@ sky_colors = np.array([207/255, 229/255, 238/255] * 4) #light blue
 # moon data
 moon_vertices = np.array(circle_triangle_fan(336, 250, 36, num_triangles=30))
 moon_indices = np.arange(moon_vertices.shape[0]//2)
-moon_colors = np.array([1, 1, 1] * (moon_vertices.shape[0]//2))
+moon_colors = np.array([1, 1, 1] * (moon_vertices.shape[0]//2), dtype=float)
 
 # layer 1 data
 layer1_mountains = np.array([
@@ -169,7 +169,7 @@ tree_layer2_colors = np.array([17/255, 33/255, 44/255] * (tree_vertices.shape[0]
 tree_heights = np.array([1, 1, 0.9, 0.8, 0.7, 0.5, 0.8, 0.75, 0.55, 0.6, 0.65, 0.5, 0.4, 0.55, 0.7, 0.5, 0.8, 0.4, 0.6, 0.0, 1, 0.65, 0.0, 0.75, 0.4, 0.45, 0.0, 0.45, 0.35, 0.55, 0.3, 0.4, 0.0, 0.7, 0.3, 0.75, 0.0, 0.5, 0.6, 0.0, 0.65, 0.7, 0.75, 0.4, 0.35, 0.0, 0.3, 0.9, 0.0, 0.75, 0.0, 0.45, 0.5, 0.55, 0.65, 0.0, 0.4, 0.0, 0.5, 0.6, 0.45, 0.0, 0.8, 0.4, 0.6])
 
 
-def landscape(window: RIT_Window, engine: CGI_Engine, custom_viewport=None, custom_transform=None):
+def landscape(window: RIT_Window, engine: CGI_Engine, custom_viewport=None, custom_transform=None, custom_tint=None):
     # Setup
     normT = engine.normalize(300, 0, 600, 0)
     base = engine.identity()
@@ -183,13 +183,28 @@ def landscape(window: RIT_Window, engine: CGI_Engine, custom_viewport=None, cust
     if custom_transform:
         base = base @ custom_transform
 
+    if custom_tint:
+        final_sky_colors = sky_colors * np.tile(custom_tint, len(sky_colors) // 3)
+        final_moon_colors = moon_colors * np.tile(custom_tint, len(moon_colors) // 3)
+        final_layer1_colors = layer1_colors * np.tile(custom_tint, len(layer1_colors) // 3)
+        final_layer2_colors = layer2_colors * np.tile(custom_tint, len(layer2_colors) // 3)
+        final_layer3_colors = layer3_colors * np.tile(custom_tint, len(layer3_colors) // 3)
+        final_layer4_colors = layer4_colors * np.tile(custom_tint, len(layer4_colors) // 3)
+    else:
+        final_sky_colors = sky_colors
+        final_moon_colors = moon_colors
+        final_layer1_colors = layer1_colors
+        final_layer2_colors = layer2_colors
+        final_layer3_colors = layer3_colors
+        final_layer4_colors = layer4_colors
+
     # Draw the scene
-    engine.draw_triangles(window, sky_vertices, sky_colors, sky_indices, base, normT)
-    engine.draw_triangles(window, moon_vertices, moon_colors, moon_indices, base, normT)
-    engine.draw_triangles(window, layer1_mountains, layer1_colors, layer1_indices, base, normT)
-    engine.draw_triangles(window, layer2_mountains, layer2_colors, layer2_indices, base, normT)
-    engine.draw_triangles(window, layer3_mountains, layer3_colors, layer3_indices, base, normT)
-    engine.draw_triangles(window, layer4_mountains, layer4_colors, layer4_indices, base, normT)
+    engine.draw_triangles(window, sky_vertices, final_sky_colors, sky_indices, base, normT)
+    engine.draw_triangles(window, moon_vertices, final_moon_colors, moon_indices, base, normT)
+    engine.draw_triangles(window, layer1_mountains, final_layer1_colors, layer1_indices, base, normT)
+    engine.draw_triangles(window, layer2_mountains, final_layer2_colors, layer2_indices, base, normT)
+    engine.draw_triangles(window, layer3_mountains, final_layer3_colors, layer3_indices, base, normT)
+    engine.draw_triangles(window, layer4_mountains, final_layer4_colors, layer4_indices, base, normT)
 
     # Draw trees with varying heights
     for i in range(len(tree_heights)):
