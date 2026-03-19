@@ -2,8 +2,8 @@ from dataclasses import dataclass
 
 @dataclass
 class Vertex:
-    x: int
-    y: int
+    x: float
+    y: float
     r: float = 0.0
     g: float = 0.0
     b: float = 0.0

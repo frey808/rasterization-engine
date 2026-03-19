@@ -169,16 +169,16 @@ tree_layer2_colors = np.array([17/255, 33/255, 44/255] * (tree_vertices.shape[0]
 tree_heights = np.array([1, 1, 0.9, 0.8, 0.7, 0.5, 0.8, 0.75, 0.55, 0.6, 0.65, 0.5, 0.4, 0.55, 0.7, 0.5, 0.8, 0.4, 0.6, 0.0, 1, 0.65, 0.0, 0.75, 0.4, 0.45, 0.0, 0.45, 0.35, 0.55, 0.3, 0.4, 0.0, 0.7, 0.3, 0.75, 0.0, 0.5, 0.6, 0.0, 0.65, 0.7, 0.75, 0.4, 0.35, 0.0, 0.3, 0.9, 0.0, 0.75, 0.0, 0.45, 0.5, 0.55, 0.65, 0.0, 0.4, 0.0, 0.5, 0.6, 0.45, 0.0, 0.8, 0.4, 0.6])
 
 
-def landscape(window: RIT_Window, engine: CGI_Engine, custom_viewport=None, color_transform=None):
+def landscape(window: RIT_Window, engine: CGI_Engine, custom_viewport=None):
     # Setup
-    normT = engine.normalize(WINDOW_Y, 0, WINDOW_X, 0)
+    normT = engine.normalize(300, 0, 600, 0)
     base = engine.identity()
     centerTreeT = engine.translate(-16, 0) #center trees at origin for easier transformations
 
     if custom_viewport:
-        engine.set_viewport(custom_viewport[0]-1, custom_viewport[1], custom_viewport[2]-1, custom_viewport[3])
+        engine.set_viewport(*custom_viewport)
     else:
-        engine.set_viewport(WINDOW_Y-1, 0, WINDOW_X-1, 0)
+        engine.set_viewport(WINDOW_Y, 0, WINDOW_X, 0)
 
     # Draw the scene
     engine.draw_triangles(window, sky_vertices, sky_colors, sky_indices, base, normT)

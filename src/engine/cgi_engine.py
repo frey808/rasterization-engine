@@ -96,7 +96,8 @@ class CGI_Engine():
                 clipped_vertices = self.clip_poly([V0, V1, V2], 1, -1, 1, -1)
                 for i, V in enumerate(clipped_vertices):
                     vec = self.VIEWPORT_T * glm.vec3(V.x, V.y, 1)
-                    clipped_vertices[i] = Vertex(int(vec[0]), int(vec[1]), V.r, V.g, V.b)
+
+                    clipped_vertices[i] = Vertex(vec[0], vec[1], V.r, V.g, V.b)
                 for i in range(0, len(clipped_vertices), 3):
                     self.rasterize_triangle(window, clipped_vertices[i], clipped_vertices[i + 1], clipped_vertices[i + 2])
 
@@ -104,10 +105,10 @@ class CGI_Engine():
         # Rasterize a triangle defined by vertices V0, V1, V2 with color interpolation
 
         # get axis aligned bounding box
-        min_x = int(min(V0.x, V1.x, V2.x))
-        max_x = int(max(V0.x, V1.x, V2.x))
-        min_y = int(min(V0.y, V1.y, V2.y))
-        max_y = int(max(V0.y, V1.y, V2.y))
+        min_x = math.floor(min(V0.x, V1.x, V2.x))
+        max_x = math.ceil(max(V0.x, V1.x, V2.x))
+        min_y = math.floor(min(V0.y, V1.y, V2.y))
+        max_y = math.ceil(max(V0.y, V1.y, V2.y))
 
         # precompute denominator for barycentric coordinates and normalize vertex order to counter-clockwise
         denom = (V1.y - V2.y) * (V0.x - V2.x) + (V2.x - V1.x) * (V0.y - V2.y)
@@ -122,24 +123,26 @@ class CGI_Engine():
         # rasterize within bounding box
         for x in range(min_x, max_x + 1):
             for y in range(min_y, max_y + 1):
-                #calculate barycentric coordinates
+                # calculate barycentric coordinates
                 w0 = ((V1.y - V2.y) * (x - V2.x) + (V2.x - V1.x) * (y - V2.y)) * inv_denom
                 w1 = ((V2.y - V0.y) * (x - V2.x) + (V0.x - V2.x) * (y - V2.y)) * inv_denom
                 w2 = 1 - w0 - w1
 
-                #check if pixel is inside triangle
-                if w0 < -EPSILON or w1 < -EPSILON or w2 < -EPSILON:
+                # check if pixel is inside triangle
+                if w0 < 0 or w1 < 0 or w2 < 0:
                     continue
 
                 # top-left rule
-                if abs(w0) < EPSILON:
-                    if not ((V1.y > V0.y) or (abs(V1.y - V0.y) < EPSILON and V1.x > V0.x)):
-                        continue
-                if abs(w1) < EPSILON:
+                if abs(w0) < EPSILON: # w0 == 0 → edge V1–V2
                     if not ((V2.y > V1.y) or (abs(V2.y - V1.y) < EPSILON and V2.x > V1.x)):
                         continue
-                if abs(w2) < EPSILON:
+
+                if abs(w1) < EPSILON: # w1 == 0 → edge V2–V0
                     if not ((V0.y > V2.y) or (abs(V0.y - V2.y) < EPSILON and V0.x > V2.x)):
+                        continue
+
+                if abs(w2) < EPSILON: # w2 == 0 → edge V0–V1
+                    if not ((V1.y > V0.y) or (abs(V1.y - V0.y) < EPSILON and V1.x > V0.x)):
                         continue
                 
                 r = w0 * V0.r + w1 * V1.r + w2 * V2.r
@@ -285,6 +288,8 @@ class CGI_Engine():
                         (-2*left/(right-left)-1, -2*bottom/(top-bottom)-1, 1))
     
     def set_viewport(self, top: int, bottom: int, right: int, left: int):
-        self.VIEWPORT_T = glm.mat3(((right-left)/2, 0, 0),
-                        (0, (top-bottom)/2, 0),
-                        ((right+left)/2, (top+bottom)/2, 1))
+        self.VIEWPORT_T = glm.mat3(
+            ((right-left-1)/2, 0, 0),
+            (0, (top-bottom-1)/2, 0),
+            ((right+left)/2, (top+bottom)/2, 1)
+        )
