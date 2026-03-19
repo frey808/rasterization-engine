@@ -44,29 +44,29 @@ layer1_mountains = np.array([
     210, 180, 300, 230, 0, 0, #peak3
     300, 230, 322, 230, 0, 0,
     322, 230, 370, 260, 0, 0, #peak4
-    370, 260, 599, 180, 0, 0,
-    0, 0, 599, 180, 599, 0
+    370, 260, 600, 180, 0, 0,
+    0, 0, 600, 180, 600, 0
 ])
 layer1_color_data = np.array([144/255, 194/255, 221/255] * (layer1_mountains.shape[0]//2))
 layer1_index_data = np.arange(layer1_mountains.shape[0]//2)
 
 # layer 2 data
 layer2_mountains = np.array([
-    0, 80, 160, 170, 599, 0, #peak1
-    160, 170, 200, 155, 599, 0,
-    200, 155, 230, 163, 599, 0, #peak2
-    230, 163, 280, 167, 599, 0,
-    280, 167, 305, 165, 599, 0,
-    305, 165, 330, 153, 599, 0,
-    330, 153, 387, 170, 599, 0, #peak3
-    387, 170, 403, 158, 599, 0,
-    403, 158, 434, 158, 599, 0,
-    434, 158, 445, 167, 599, 0, #peak4
-    445, 167, 463, 167, 599, 0,
-    463, 167, 495, 198, 599, 0, #peak5
-    495, 198, 531, 198, 599, 0,
-    531, 198, 599, 224, 599, 0,
-    # 0, 0, 599, 224, 599, 0
+    0, 80, 160, 170, 600, 0, #peak1
+    160, 170, 200, 155, 600, 0,
+    200, 155, 230, 163, 600, 0, #peak2
+    230, 163, 280, 167, 600, 0,
+    280, 167, 305, 165, 600, 0,
+    305, 165, 330, 153, 600, 0,
+    330, 153, 387, 170, 600, 0, #peak3
+    387, 170, 403, 158, 600, 0,
+    403, 158, 434, 158, 600, 0,
+    434, 158, 445, 167, 600, 0, #peak4
+    445, 167, 463, 167, 600, 0,
+    463, 167, 495, 198, 600, 0, #peak5
+    495, 198, 531, 198, 600, 0,
+    531, 198, 600, 224, 600, 0,
+    # 0, 0, 600, 224, 600, 0 #fills in gap beneath peaks, but is unecessary since other layers cover it up
 ])
 layer2_color_data = np.array([116/255, 167/255, 215/255] * (layer2_mountains.shape[0]//2))
 layer2_index_data = np.arange(layer2_mountains.shape[0]//2)
@@ -96,7 +96,7 @@ layer3_mountains = np.array([
     433, 107, 456, 107, 0, 0,
     456, 107, 475, 93, 0, 0,
     475, 93, 501, 91, 0, 0,
-    501, 91, 599, 0, 0, 0,
+    501, 91, 600, 0, 0, 0,
 ])
 layer3_color_data = np.array([51/255, 111/255, 154/255] * (layer3_mountains.shape[0]//2))
 layer3_index_data = np.arange(layer3_mountains.shape[0]//2)
@@ -127,15 +127,15 @@ layer4_mountains = np.array([
     412, 90, 433, 75, 300, 0,
     433, 75, 446, 80, 300, 0,
     446, 80, 477, 84, 300, 0,
-    300, 0, 477, 84, 599, 0, #stitching point
-    477, 84, 485, 91, 599, 0,
-    485, 91, 499, 94, 599, 0,
-    499, 94, 503, 106, 599, 0,
-    503, 106, 532, 111, 599, 0,
-    532, 111, 543, 123, 599, 0,
-    543, 123, 557, 127, 599, 0,
-    557, 127, 573, 124, 599, 0,
-    573, 124, 599, 126, 599, 0,
+    300, 0, 477, 84, 600, 0, #stitching point
+    477, 84, 485, 91, 600, 0,
+    485, 91, 499, 94, 600, 0,
+    499, 94, 503, 106, 600, 0,
+    503, 106, 532, 111, 600, 0,
+    532, 111, 543, 123, 600, 0,
+    543, 123, 557, 127, 600, 0,
+    557, 127, 573, 124, 600, 0,
+    573, 124, 600, 126, 600, 0,
 ])
 layer4_color_data = np.array([29/255, 69/255, 104/255] * (layer4_mountains.shape[0]//2))
 layer4_index_data = np.arange(layer4_mountains.shape[0]//2)
@@ -148,7 +148,8 @@ tree_vertices = np.array([
     6, 9, 0, 16, 1, 21, 3, 26, 4, 31, 6, 36, 8, 41, 10, 47, 11, 54, 12, 58, 13, 64, #left side foliage tips (idx 16-26)
     26, 9, 32, 16, 31, 21, 29, 26, 28, 31, 26, 36, 24, 41, 22, 47, 21, 54, 20, 58, 19, 64, #right side foliage tips (idx 27-37)
 ])
-tree_color_data = np.array([17/255, 33/255, 44/255] * (tree_vertices.shape[0]//2))
+tree_layer1_color_data = np.array([29/255, 58/255, 74/255] * (tree_vertices.shape[0]//2))
+tree_layer2_color_data = np.array([17/255, 33/255, 44/255] * (tree_vertices.shape[0]//2))
 tree_index_data = np.array([
     0, 1, 2, #trunk
     3, 5, 16, 4, 6, 17, 5, 7, 18, 6, 8, 19, 7, 9, 20, 8, 10, 21, 9, 11, 22, 10, 12, 23, 11, 13, 24, 13, 14, 25, 14, 15, 26, #left side foliage
@@ -160,10 +161,10 @@ tree_heights = np.array([1, 1, 0.9, 0.8, 0.7, 0.5, 0.8, 0.75, 0.55, 0.6, 0.65, 0
 def landscape(window: RIT_Window, engine: CGI_Engine):
     # Setup
     window.clear_fb(207/255, 229/255, 238/255) #light blue background
-    engine.set_viewport(WINDOW_Y, 0, WINDOW_X, 0)
     normT = engine.normalize(WINDOW_Y, 0, WINDOW_X, 0)
+    engine.set_viewport(WINDOW_Y-1, 0, WINDOW_X-1, 0)
     base = engine.identity()
-    centerTreeT = engine.translate(-16, 0) #center tree at origin for easier transformations
+    centerTreeT = engine.translate(-16, 0) #center trees at origin for easier transformations
 
     # Draw the scene
     engine.draw_triangles(window, moon_vertices, moon_color_data, moon_index_data, base, normT)
@@ -172,12 +173,19 @@ def landscape(window: RIT_Window, engine: CGI_Engine):
     engine.draw_triangles(window, layer3_mountains, layer3_color_data, layer3_index_data, base, normT)
     engine.draw_triangles(window, layer4_mountains, layer4_color_data, layer4_index_data, base, normT)
 
-    #Draw trees with varying heights
+    # Draw trees with varying heights
+    for i in range(len(tree_heights)):
+        scale = tree_heights[(i+len(tree_heights)//12)%len(tree_heights)] #rotate array to get different heights for trees in the back vs front layers
+        if scale == 0:
+            continue # skip invisible trees
+        tree = base @ engine.translate(i * 598/len(tree_heights), -7 * (1 - scale)) @ engine.scale(1 - 0.75 * (1 - scale), scale) @ centerTreeT
+        engine.draw_triangles(window, tree_vertices, tree_layer1_color_data, tree_index_data, tree, normT)
+    
     for i, scale in enumerate(tree_heights):
         if scale == 0:
             continue # skip invisible trees
-        tree = base @ engine.translate(i * 598/len(tree_heights), 0) @ engine.scale(scale, scale) @ centerTreeT
-        engine.draw_triangles(window, tree_vertices, tree_color_data, tree_index_data, tree, normT)
+        tree = base @ engine.translate(i * 598/len(tree_heights), -7 * (1 - scale)) @ engine.scale(1 - 0.75 * (1 - scale), scale) @ centerTreeT
+        engine.draw_triangles(window, tree_vertices, tree_layer2_color_data, tree_index_data, tree, normT)
 
 
 def main():
